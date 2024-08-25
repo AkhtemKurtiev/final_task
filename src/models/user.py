@@ -1,5 +1,5 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.db import BaseModel
 
@@ -9,6 +9,7 @@ class User(BaseModel):
 
     id = Column(Integer, primary_key=True)
     email = Column(String, unique=True, nullable=False)
+    username: Mapped[str] = mapped_column(String(32), unique=True)
     hashed_password = Column(String, nullable=False)
     firs_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
