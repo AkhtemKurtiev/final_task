@@ -5,7 +5,7 @@ from src.database.db import BaseModel
 
 
 class Company(BaseModel):
-    __tablename__ = "companies"
+    __tablename__ = 'companies'
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)

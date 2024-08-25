@@ -1,6 +1,7 @@
 from sqlalchemy import (
     Column, Integer, String,
-    Sequence, Index, func, select, update
+    Sequence, Index, func, select, update,
+    ForeignKey
 )
 from sqlalchemy.orm import relationship, remote, foreign
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,8 +18,9 @@ class Department(BaseModel):
     id = Column(Integer, id_seq, primary_key=True)
     name = Column(String, nullable=False)
     path: LtreeType = Column(LtreeType, nullable=False)
-    company_id = Column(Integer, nullable=False)
+    company_id = Column(Integer, ForeignKey('companies.id'))
 
+    company = relationship('Company', back_populates='department')
     parent = relationship(
         'Department',
         primaryjoin=remote(path) == foreign(func.subpath(path, 0, -1)),
