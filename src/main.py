@@ -6,7 +6,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 
-from src.api.v1.routers import v1_spimex_router
+# from src.api.v1.routers import v1_spimex_router
 
 
 async def startup():
