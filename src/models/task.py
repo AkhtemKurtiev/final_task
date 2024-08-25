@@ -20,8 +20,8 @@ class Task(BaseModel):
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
-    author_id = Column(Integer, ForeignKey('users.id'))
-    responsible_id = Column(Integer, ForeignKey('users.id'))
+    author_id = Column(Integer, ForeignKey('user.id'))
+    responsible_id = Column(Integer, ForeignKey('user.id'))
     deadline = Column(DateTime, nullable=True)
     status = Column(Enum(TaskStatus), default=TaskStatus.PENDING)
 

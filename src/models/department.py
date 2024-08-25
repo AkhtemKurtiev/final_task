@@ -43,7 +43,7 @@ class Department(BaseModel):
             self.path = self.parent.path + '.' + str(self.id)
 
     __table_args__ = (
-        Index('ix_departments_path', path, postgresql_using='gist')
+        Index('ix_departments_path', path, postgresql_using='gist'),
     )
 
     async def delete(self, session: AsyncSession):
