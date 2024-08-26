@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from src.shemas.user import UserCreate, UserResponse
+from src.shemas.user import UserCreate, UserResponseRegister, UserLogin
 from src.models.user import User
 from src.auth.utils import hash_password, validate_password, encode_jwt
 from src.database.db import get_async_session
@@ -13,8 +13,8 @@ router = APIRouter(
 )
 
 
-@router.post('/register/', response_model=UserResponse)
-async def register(user: UserCreate, db: AsyncSession = Depends(get_async_session)):
+@router.post('/register/', response_model=UserResponseRegister)
+async def register(user: dict = Depends(UserCreate), db: AsyncSession = Depends(get_async_session)):
     result = await db.execute(select(User).filter(User.email == user.email))
     db_user = result.scalars().first()
     if db_user:
@@ -37,7 +37,7 @@ async def register(user: UserCreate, db: AsyncSession = Depends(get_async_sessio
 
 
 @router.post('/login')
-async def login(user: UserCreate, db: AsyncSession = Depends(get_async_session)):
+async def login(user: dict = Depends(UserLogin), db: AsyncSession = Depends(get_async_session)):
     result = await db.execute(select(User).filter(User.email == user.email))
     db_user = result.scalars().first()
     if not db_user:

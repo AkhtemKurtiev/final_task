@@ -26,7 +26,7 @@ def encode_jwt(
         jti=str(uuid.uuid4())
     )
     encoded = jwt.encode(
-        to_encode, 
+        to_encode,
         private_key,
         algorithm=algorithm,
     )
