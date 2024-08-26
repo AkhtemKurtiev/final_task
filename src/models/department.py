@@ -20,7 +20,7 @@ class Department(BaseModel):
     path: LtreeType = Column(LtreeType, nullable=False)
     company_id = Column(Integer, ForeignKey('companies.id'))
 
-    company = relationship('Company', back_populates='department')
+    company = relationship('Company', back_populates='departments')
     parent = relationship(
         'Department',
         primaryjoin=remote(path) == foreign(func.subpath(path, 0, -1)),

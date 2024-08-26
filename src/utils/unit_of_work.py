@@ -4,11 +4,11 @@ from types import TracebackType
 from typing import Any
 
 from src.database.db import AsyncSessionLocal
-from src.repositories.spimex import SpimexRepository
+# from src.repositories.spimex import SpimexRepository
 
 
 class AbstractUnitOfWork(ABC):
-    spimex: SpimexRepository
+    # spimex: SpimexRepository
 
     @abstractmethod
     def __init__(self):
@@ -43,7 +43,7 @@ class UnitOfWork(AbstractUnitOfWork):
 
     async def __aenter__(self):
         self.session = self.session_factory()
-        self.spimex = SpimexRepository(self.session)
+        # self.spimex = SpimexRepository(self.session)
 
     async def __aexit__(
             self,
