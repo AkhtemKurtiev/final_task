@@ -20,21 +20,26 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     username: Annotated[str, MinLen(3), MaxLen(20)]
-    password: bytes
-    company_id: int
-    position_id: int
+    password: str
+    company_id: Optional[int] = None
+    position_id: Optional[int] = None
 
 
 class UserUpdate(UserBase):
     pass
 
 
-class UserResponse(UserBase):
+class UserResponseRegister(UserBase):
     id: int
-    company: Optional['CompanyCommon'] = None
-    position: Optional['PositionResponse'] = None
-    authored_tasks: Optional[List['TaskResponse']] = []
-    responsible_tasks: Optional[List['TaskResponse']] = []
+    # company: Optional['CompanyCommon'] = None
+    # position: Optional['PositionResponse'] = None
+    # authored_tasks: Optional[List['TaskResponse']] = []
+    # responsible_tasks: Optional[List['TaskResponse']] = []
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str

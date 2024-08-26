@@ -1,13 +1,21 @@
-from src.shemas.company import CompanyBase
-from src.shemas.user import UserBase
+from __future__ import annotations
+from pydantic import BaseModel
 
 
-class CompanyCommon(CompanyBase):
-    pass
-
-
-class UserCommon(UserBase):
+class UserCommon(BaseModel):
     id: int
+    email: str
+    username: str
+    first_name: str
+    last_name: str
+
+    class Config:
+        from_attributes = True
+
+
+class CompanyCommon(BaseModel):
+    id: int
+    name: str
 
     class Config:
         from_attributes = True
