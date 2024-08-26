@@ -1,11 +1,12 @@
-from typing import Optional, List, Annotated
+from __future__ import annotations
 
+from typing import Optional, List, Annotated
 from pydantic import BaseModel, EmailStr
 from annotated_types import MinLen, MaxLen
 
-from .company import CompanyResponse
-from .position import PositionResponse
-from .task import TaskResponse
+from src.shemas.common import CompanyCommon
+from src.shemas.position import PositionResponse
+from src.shemas.task import TaskResponse
 
 
 class UserBase(BaseModel):
@@ -28,12 +29,12 @@ class UserUpdate(UserBase):
     pass
 
 
-class UserResponse():
+class UserResponse(UserBase):
     id: int
-    company: Optional['CompanyResponse']
-    position: Optional['PositionResponse']
+    company: Optional['CompanyCommon'] = None
+    position: Optional['PositionResponse'] = None
     authored_tasks: Optional[List['TaskResponse']] = []
     responsible_tasks: Optional[List['TaskResponse']] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True

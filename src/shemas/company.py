@@ -1,15 +1,17 @@
-from pydantic import BaseModel
-from typing import List, Optional
+from __future__ import annotations
 
-from .department import DepartmentResponse
-from .user import UserResponse
+from typing import List, Optional, TYPE_CHECKING
+from pydantic import BaseModel
+
+from src.shemas.department import DepartmentResponse
+from src.shemas.common import UserCommon
 
 
 class CompanyBase(BaseModel):
     name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CompanyCreate(CompanyBase):
@@ -23,4 +25,4 @@ class CompanyUpdate(CompanyBase):
 class CompanyResponse(CompanyBase):
     id: int
     departments: Optional[List['DepartmentResponse']] = []
-    employees: Optional[List['UserResponse']] = []
+    employees: Optional[List['UserCommon']] = []
