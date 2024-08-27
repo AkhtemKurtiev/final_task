@@ -6,7 +6,8 @@ from sqlalchemy.future import select
 from src.shemas.user import (
     UserLogin,
     UserResgister,
-    UserAdminCreateEmployee
+    UserAdminCreateEmployee,
+    UserName
 )
 from src.models.user import User
 from src.models.invite_token import InviteToken
@@ -181,3 +182,43 @@ async def confirm_registration(
     await db.commit()
 
     return {'massage': 'Registration completed successfully'}
+
+
+@router.post('/email_update/')
+async def email_update(
+    token: str,
+    new_email: str,
+    current_user: User = Depends(authorized_user_required),
+    db: AsyncSession = Depends(get_async_session)
+):
+    if not validate_invite_token(new_email, token):
+        raise HTTPException(status_code=400, detail='Invalid invite token')
+
+    result = await db.execute(select(User).filter(User.email == new_email))
+    db_user = result.scalars().first()
+
+    if db_user:
+        raise HTTPException(status_code=400, detail='Email is already use')
+
+    current_user.email = new_email
+    db.add(current_user)
+    await db.commit()
+    await db.refresh(current_user)
+
+    return {'message': 'Email updated successfully'}
+
+
+@router.post('/name_update/')
+async def name_update(
+    name: dict = Depends(UserName),
+    current_user: User = Depends(authorized_user_required),
+    db: AsyncSession = Depends(get_async_session)
+):
+    current_user.first_name = name.first_name
+    current_user.last_name = name.last_name
+
+    db.add(current_user)
+    await db.commit()
+    db.refresh(current_user)
+
+    return {'message': 'Name update successfully'}

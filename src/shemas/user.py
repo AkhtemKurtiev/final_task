@@ -63,3 +63,8 @@ class UserAdminCreateEmployee(BaseModel):
     first_name: str
     last_name: str
     is_admin: Optional[bool] = False
+
+
+class UserName(BaseModel):
+    first_name: str
+    last_name: str
