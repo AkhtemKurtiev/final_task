@@ -5,7 +5,7 @@ from src.config import SECRET_KEY
 
 import smtplib
 from email.mime.text import MIMEText
-# from src.config import SMTP_SERVER, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
+from src.config import SMTP_SERVER, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
 
 
 def create_invite_token(email: str) -> str:
@@ -20,12 +20,6 @@ def create_invite_token(email: str) -> str:
         algorithm='HS256'
     )
     return token
-
-
-SMTP_SERVER='smtp.gmail.com'
-SMTP_PORT=587
-SMTP_USER='rtyui8532@gmail.com'
-SMTP_PASSWORD='kolopolop123'
 
 
 def send_invite_email(email: str, invite_token: str):
