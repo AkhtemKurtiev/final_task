@@ -21,6 +21,8 @@ class Department(BaseModel):
     company_id = Column(Integer, ForeignKey('companies.id'))
 
     company = relationship('Company', back_populates='departments')
+    positions = relationship('Position', back_populates='department')
+
     parent = relationship(
         'Department',
         primaryjoin=remote(path) == foreign(func.subpath(path, 0, -1)),

@@ -9,7 +9,7 @@ from src.database.db import BaseModel
 
 
 class TaskStatus(enum.Enum):
-    PENDING = 'penfing'
+    PENDING = 'pending'
     IN_PROGRESS = 'in_progress'
     COMPLETED = 'completed'
 
