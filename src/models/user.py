@@ -36,5 +36,5 @@ class User(BaseModel):
 
     invite_tokens = relationship(
         'InviteToken',
-        back_populates='users'
+        back_populates='user'
     )

@@ -43,3 +43,23 @@ class UserResponseRegister(UserBase):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+
+class UserResgister(BaseModel):
+    email: EmailStr
+    username: Annotated[str, MinLen(3), MaxLen(20)]
+    password: str
+    username: str
+    first_name: str
+    last_name: str
+    is_admin: Optional[bool] = True
+    company_name: str
+
+
+class UserAdminCreateEmployee(BaseModel):
+    email: EmailStr
+    username: Annotated[str, MinLen(3), MaxLen(20)]
+    username: str
+    first_name: str
+    last_name: str
+    is_admin: Optional[bool] = False
