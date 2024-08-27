@@ -9,6 +9,7 @@ from src.config import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER
 from src.database.db import BaseModel
 from src.models.company import Company
 from src.models.department import Department
+from src.models.invite_token import InviteToken
 from src.models.position import Position
 from src.models.task import Task
 from src.models.user import User
