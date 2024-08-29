@@ -17,7 +17,7 @@ from src.database.db import get_async_session
 from src.api.user.v1.utils.email_message import (
     create_invite_token, send_invite_email, validate_invite_token
 )
-from src.api.user.v1.utils.auth_protect import (
+from src.api.utils.auth_protect import (
     admin_required, authorized_user_required
 )
 
