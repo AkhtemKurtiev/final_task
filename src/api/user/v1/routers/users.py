@@ -184,7 +184,7 @@ async def confirm_registration(
     return {'massage': 'Registration completed successfully'}
 
 
-@router.post('/email_update/')
+@router.put('/email_update/')
 async def email_update(
     token: str,
     new_email: str,
@@ -208,7 +208,7 @@ async def email_update(
     return {'message': 'Email updated successfully'}
 
 
-@router.post('/name_update/')
+@router.put('/name_update/')
 async def name_update(
     name: dict = Depends(UserName),
     current_user: User = Depends(authorized_user_required),

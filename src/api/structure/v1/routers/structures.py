@@ -112,7 +112,7 @@ async def assign_manager(
     }
 
 
-@router.post('/departments/delete/')
+@router.delete('/departments/delete/')
 async def delete_department(
     department_id: int,
     current_user: User = Depends(admin_required),
