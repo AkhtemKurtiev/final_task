@@ -7,6 +7,8 @@ from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 
 from src.api.user.v1.routers import v1_user_router
+from src.api.structure.v1.routers import v1_structure_router
+from src.api.task.v1.routers import v1_task_router
 
 
 async def startup():
@@ -39,3 +41,5 @@ app = FastAPI(
 )
 
 app.include_router(v1_user_router)
+app.include_router(v1_structure_router)
+app.include_router(v1_task_router)
