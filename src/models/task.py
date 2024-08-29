@@ -1,7 +1,7 @@
 import enum
 
 from sqlalchemy import (
-    Column, String, Integer, ForeignKey, DateTime, Enum, Text
+    Column, String, Integer, ForeignKey, DateTime, Enum, Text, Table
 )
 from sqlalchemy.orm import relationship
 
@@ -14,6 +14,22 @@ class TaskStatus(enum.Enum):
     COMPLETED = 'completed'
 
 
+task_observers_association = Table(
+    'task_observers',
+    BaseModel.metadata,
+    Column('task_id', Integer, ForeignKey('task.id')),
+    Column('user_id', Integer, ForeignKey('user.id'))
+)
+
+
+task_performers_association = Table(
+    'task_performers',
+    BaseModel.metadata,
+    Column('task_id', Integer, ForeignKey('task.id')),
+    Column('user_id', Integer, ForeignKey('user.id'))
+)
+
+
 class Task(BaseModel):
     __tablename__ = 'task'
 
@@ -24,6 +40,17 @@ class Task(BaseModel):
     responsible_id = Column(Integer, ForeignKey('user.id'))
     deadline = Column(DateTime, nullable=True)
     status = Column(Enum(TaskStatus), default=TaskStatus.PENDING)
+
+    observers = relationship(
+        'User',
+        secondary=task_observers_association,
+        back_populates='observed_tasks'
+    )
+    performers = relationship(
+        'User',
+        secondary=task_performers_association,
+        back_populates='performed_tasks'
+    )
 
     author = relationship(
         'User',

@@ -4,6 +4,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.db import BaseModel
+from src.models.task import task_observers_association, task_performers_association
 
 
 class User(BaseModel):
@@ -32,6 +33,18 @@ class User(BaseModel):
         'Task',
         foreign_keys='Task.responsible_id',
         back_populates='responsible'
+    )
+
+    observed_tasks = relationship(
+        'Task',
+        secondary=task_observers_association,
+        back_populates='observers'
+    )
+
+    performed_tasks = relationship(
+        'Task',
+        secondary=task_performers_association,
+        back_populates='performers'
     )
 
     invite_tokens = relationship(

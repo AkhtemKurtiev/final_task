@@ -1,7 +1,7 @@
 from sqlalchemy import (
     Column, Integer, String,
     Sequence, Index, func, select, update,
-    ForeignKey
+    ForeignKey, text, delete, cast
 )
 from sqlalchemy.orm import relationship, remote, foreign
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,6 +20,9 @@ class Department(BaseModel):
     path: LtreeType = Column(LtreeType, nullable=False)
     company_id = Column(Integer, ForeignKey('companies.id'))
 
+    manager_id = Column(Integer, ForeignKey('user.id'), nullable=True)
+    manager = relationship('User', backref='managed_departments')
+
     company = relationship('Company', back_populates='departments')
     positions = relationship('Position', back_populates='department')
 
@@ -37,35 +40,45 @@ class Department(BaseModel):
         self.path = None
 
     async def initialize(self, session: AsyncSession):
-        result = await session.execute(id_seq)
-        self.id = result.scalar()
+        self.id = await session.scalar(id_seq)
 
-        lthree_id = Ltree(str(self.id))
-        if self.parent is None:
-            self.path = lthree_id
+        if self.parent and self.parent.path:
+            self.path = Ltree(f"{self.parent.path}.{self.id}")
+        elif self.parent is None:
+            self.path = Ltree(str(self.id))
         else:
-            self.path = self.parent.path + '.' + str(self.id)
+            raise ValueError("Invalid parent path")
 
     __table_args__ = (
         Index('ix_departments_path', path, postgresql_using='gist'),
     )
 
-    async def delete(self, session: AsyncSession):
-        parent_stmt = select(Department).filter(
-                func.subpath(self.path, 0, -1) == Department.path
-            )
-        result = await session.execute(parent_stmt)
-        parent_node = result.scalars().first()
+    # SQL запросы не безопасны. Придумайте ORM реализацию перед использованием!
+    async def delete_department(self, session: AsyncSession):
+        parent_path_str = str(self.path)
 
-        if parent_node:
-            for child in self.children:
-                new_path = parent_node.path + '.' + str(child.id)
-                update_stmt = update(Department).where(
-                    Department.id == child.id
-                ).values(path=new_path)
-                await session.execute(update_stmt)
+        await session.execute(
+            text(
+                """
+                UPDATE departments
+                SET path = text2ltree(
+                    concat(
+                        ltree2text(subpath(:parent_path, 0, -1)),
+                        '.',
+                        ltree2text(subpath(departments.path, nlevel(:parent_path)))
+                    )
+                )
+                WHERE departments.path <@ :parent_path
+                AND departments.path != :parent_path
+                """
+            ),
+            {'parent_path': parent_path_str}
+        )
 
-        await session.delete(self)
+        await session.execute(
+            delete(self.__class__).where(self.__class__.id == self.id)
+        )
+
         await session.commit()
 
     def __str__(self):
