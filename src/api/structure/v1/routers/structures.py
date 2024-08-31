@@ -29,15 +29,29 @@ async def create_department(
     parent = None
     if parent_id:
         parent = await db.get(Department, parent_id)
+        if not parent or parent.company_id != company_id:
+            raise HTTPException(status_code=404, detail='Parent department not found')
+    else:
+        result = await db.execute(
+            select(Department).filter(
+                Department.company_id == company_id,
+                Department.is_can_deleted == False,
+            )
+        )
+        parent = result.scalars().first()
+        if not parent:
+            raise HTTPException(status_code=400, detail='Root department not found')
 
     new_department = Department(
         name=name,
         parent=parent,
         company_id=company_id
     )
+
     await new_department.initialize(db)
     db.add(new_department)
     await db.commit()
+    await db.refresh(new_department)
 
     return new_department
 

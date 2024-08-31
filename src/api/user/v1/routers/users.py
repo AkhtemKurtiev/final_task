@@ -12,6 +12,7 @@ from src.shemas.user import (
 from src.models.user import User
 from src.models.invite_token import InviteToken
 from src.models.company import Company
+from src.models.department import Department
 from src.auth.utils import hash_password, validate_password, encode_jwt
 from src.database.db import get_async_session
 from src.api.user.v1.utils.email_message import (
@@ -59,7 +60,7 @@ async def check_account(
         raise HTTPException(status_code=400, detail='Email already registered')
 
     invite_token = create_invite_token(email)
-    await send_invite_email(email, invite_token)
+    # await send_invite_email(email, invite_token)
     return {'masssege': 'Invite sent to email', 'invite_token': invite_token}
 
 
@@ -102,6 +103,20 @@ async def sign_up_complete(
     )
     db.add(new_user)
     await db.commit()
+    await db.refresh(new_user)
+
+    department_name = f'Department {new_company.name}'
+    new_department = Department(
+        name=department_name,
+        company_id=new_company.id,
+        parent=None,
+        is_can_deleted=False
+    )
+    await new_department.initialize(db)
+    db.add(new_department)
+    await db.commit()
+    await db.refresh(new_department)
+
     return {"message": "Registration complete. Admin user created."}
 
 
@@ -145,7 +160,7 @@ async def create_employee(
     db.add(invite)
     await db.commit()
 
-    await send_invite_email(employee.email, invite_token)
+    # await send_invite_email(employee.email, invite_token)
     return {'messege': 'Employee created and invite sent to email'}
 
 

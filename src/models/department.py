@@ -1,7 +1,8 @@
+from fastapi import HTTPException
 from sqlalchemy import (
     Column, Integer, String,
     Sequence, Index, func, select, update,
-    ForeignKey, text, delete, cast
+    ForeignKey, text, delete, cast, Boolean
 )
 from sqlalchemy.orm import relationship, remote, foreign
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +20,7 @@ class Department(BaseModel):
     name = Column(String, nullable=False)
     path: LtreeType = Column(LtreeType, nullable=False)
     company_id = Column(Integer, ForeignKey('companies.id'))
+    is_can_deleted = Column(Boolean, default=True)
 
     manager_id = Column(Integer, ForeignKey('user.id'), nullable=True)
     manager = relationship('User', backref='managed_departments')
@@ -33,10 +35,13 @@ class Department(BaseModel):
         viewonly=True,
     )
 
-    def __init__(self, name, parent=None, company_id=None):
+    def __init__(
+            self, name, parent=None, company_id=None, is_can_deleted=True
+    ):
         self.name = name
         self.company_id = company_id
         self.parent = parent
+        self.is_can_deleted = is_can_deleted
         self.path = None
 
     async def initialize(self, session: AsyncSession):
@@ -55,6 +60,13 @@ class Department(BaseModel):
 
     # SQL запросы не безопасны. Придумайте ORM реализацию перед использованием!
     async def delete_department(self, session: AsyncSession):
+
+        if not self.is_can_deleted:
+            raise HTTPException(
+                status_code=400,
+                detail="This department can't be deleted."
+            )
+
         parent_path_str = str(self.path)
 
         await session.execute(
