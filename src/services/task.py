@@ -15,16 +15,12 @@ class TaskService(BaseService):
         current_user,
     ):
         observers = [
-                (
                     await self.uow.user.get_user_by_filter_id(user_id)
                     for user_id in task_data.observers
-                )
             ]
         performers = [
-                (
                     await self.uow.user.get_user_by_filter_id(user_id)
                     for user_id in task_data.performers
-                )
             ]
         task_data.observers = observers
         task_data.performers = performers
