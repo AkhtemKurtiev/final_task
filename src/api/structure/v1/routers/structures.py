@@ -1,15 +1,10 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from fastapi import APIRouter, Depends
 
-
-from src.database.db import get_async_session
-from src.models.department import Department
-from src.models.position import Position
-from src.models.user import User
 from src.api.utils.auth_protect import admin_required
+from src.models.user import User
+from src.services.structure import StructureService
 
 router = APIRouter(
     prefix='/structure',
@@ -22,38 +17,9 @@ async def create_department(
     name: str,
     parent_id: Optional[int] = None,
     current_user: User = Depends(admin_required),
-    db: AsyncSession = Depends(get_async_session)
+    service: StructureService = Depends(StructureService)
 ):
-    company_id = current_user.company_id
-
-    parent = None
-    if parent_id:
-        parent = await db.get(Department, parent_id)
-        if not parent or parent.company_id != company_id:
-            raise HTTPException(status_code=404, detail='Parent department not found')
-    else:
-        result = await db.execute(
-            select(Department).filter(
-                Department.company_id == company_id,
-                Department.is_can_deleted == False,
-            )
-        )
-        parent = result.scalars().first()
-        if not parent:
-            raise HTTPException(status_code=400, detail='Root department not found')
-
-    new_department = Department(
-        name=name,
-        parent=parent,
-        company_id=company_id
-    )
-
-    await new_department.initialize(db)
-    db.add(new_department)
-    await db.commit()
-    await db.refresh(new_department)
-
-    return new_department
+    return await service.create_department(name, parent_id, current_user)
 
 
 @router.post('/positions/')
@@ -61,18 +27,9 @@ async def create_position(
     name: str,
     department_id: int,
     current_user: User = Depends(admin_required),
-    db: AsyncSession = Depends(get_async_session)
+    service: StructureService = Depends(StructureService)
 ):
-    department = await db.get(Department, department_id)
-    if not department:
-        raise HTTPException(status_code=404,  detail='Department not found')
-
-    new_position = Position(name=name, department=department)
-    db.add(new_position)
-    await db.commit()
-    await db.refresh(new_position)
-
-    return new_position
+    return await service.create_position(name, department_id, current_user)
 
 
 @router.post('/assign-position/')
@@ -80,22 +37,11 @@ async def assign_position_to_user(
     user_id: int,
     position_id: int,
     current_user: User = Depends(admin_required),
-    db: AsyncSession = Depends(get_async_session)
+    service: StructureService = Depends(StructureService)
 ):
-    user = await db.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail='User not found')
-
-    position = await db.get(Position, position_id)
-    if not position:
-        raise HTTPException(status_code=404, detail='Position not found')
-
-    user.position = position
-    db.add(user)
-    await db.commit()
-    await db.refresh(user)
-
-    return {'message': 'Position assigned to user successfully'}
+    return await service.assign_position_to_user(
+        user_id, position_id, current_user
+    )
 
 
 @router.post('/departments/{department_id}/assign-manager/')
@@ -103,39 +49,15 @@ async def assign_manager(
     department_id: int,
     user_id: int,
     current_user: User = Depends(admin_required),
-    db: AsyncSession = Depends(get_async_session)
+    service: StructureService = Depends(StructureService)
 ):
-    department = await db.get(Department, department_id)
-    if not department:
-        raise HTTPException(status_code=404, detail='Department not found')
-
-    result = await db.execute(select(User).filter(User.id == user_id))
-    user = result.scalars().first()
-    if not user:
-        raise HTTPException(status_code=404, detail='User not found')
-
-    department.manager_id = user.id
-    db.add(department)
-    await db.commit()
-    await db.refresh(department)
-
-    return {
-        'message': 'Manager assigned successfully',
-        'department': department.name,
-        'manager': user.first_name + ' ' + user.last_name
-    }
+    return await service.assign_manager(department_id, user_id, current_user)
 
 
 @router.delete('/departments/delete/')
 async def delete_department(
     department_id: int,
     current_user: User = Depends(admin_required),
-    db: AsyncSession = Depends(get_async_session)
+    service: StructureService = Depends(StructureService)
 ):
-    department = await db.get(Department, department_id)
-    if not department:
-        raise HTTPException(status_code=404, detail='Department not found')
-
-    await department.delete_department(db)
-
-    return {'message': 'Department deleted successfully'}
+    return await service.delete_department(department_id, current_user)
