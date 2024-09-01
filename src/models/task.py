@@ -1,7 +1,9 @@
 import enum
 
 from sqlalchemy import (
-    Column, String, Integer, ForeignKey, DateTime, Enum, Text, Table
+    Column, DateTime, Enum,
+    ForeignKey, Integer, String,
+    Table, Text
 )
 from sqlalchemy.orm import relationship
 

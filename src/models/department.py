@@ -1,12 +1,13 @@
 from fastapi import HTTPException
 from sqlalchemy import (
-    Column, Integer, String,
-    Sequence, Index, func, select, update,
-    ForeignKey, text, delete, cast, Boolean
+    Boolean, Column, delete, 
+    ForeignKey, func, Index, 
+    Integer, String, Sequence,
+    text,
 )
-from sqlalchemy.orm import relationship, remote, foreign
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy_utils import LtreeType, Ltree
+from sqlalchemy.orm import foreign, relationship, remote
+from sqlalchemy_utils import Ltree, LtreeType
 
 from src.database.db import BaseModel
 

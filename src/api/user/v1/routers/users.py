@@ -1,27 +1,18 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 
-from src.shemas.user import (
-    UserLogin,
-    UserResgister,
-    UserAdminCreateEmployee,
-    UserName
-)
-from src.models.user import User
-from src.models.invite_token import InviteToken
-from src.models.company import Company
-from src.models.department import Department
-from src.auth.utils import hash_password, validate_password, encode_jwt
-from src.database.db import get_async_session
-from src.api.user.v1.utils.email_message import (
-    create_invite_token, send_invite_email, validate_invite_token
-)
 from src.api.utils.auth_protect import (
     admin_required, authorized_user_required
 )
+from src.models.user import User
 from src.services.user import UserService
+from src.shemas.user import (
+    UserAdminCreateEmployee,
+    UserLogin,
+    UserName,
+    UserResgister
+)
+
 
 router = APIRouter(
     prefix='/auth',

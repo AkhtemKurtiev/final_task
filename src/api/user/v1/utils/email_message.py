@@ -1,11 +1,13 @@
+from datetime import datetime, timedelta
+from email.mime.text import MIMEText
+import smtplib
+
 import jwt
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
-from datetime import datetime, timedelta
-from src.config import SECRET_KEY
 
-import smtplib
-from email.mime.text import MIMEText
-from src.config import SMTP_SERVER, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
+from src.config import (
+    SECRET_KEY, SMTP_SERVER, SMTP_PASSWORD, SMTP_PORT, SMTP_USER
+)
 
 
 def create_invite_token(email: str) -> str:

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import List, Optional, TYPE_CHECKING
 from pydantic import BaseModel
+from typing import List, Optional
 
-from src.shemas.department import DepartmentResponse
 from src.shemas.common import UserCommon
+from src.shemas.department import DepartmentResponse
 
 
 class CompanyBase(BaseModel):

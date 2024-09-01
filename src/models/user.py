@@ -1,10 +1,12 @@
 from sqlalchemy import (
-    Boolean, Column, ForeignKey, Integer, String, LargeBinary
+    Boolean, Column, ForeignKey, Integer, LargeBinary, String
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.db import BaseModel
-from src.models.task import task_observers_association, task_performers_association
+from src.models.task import (
+    task_observers_association, task_performers_association
+)
 
 
 class User(BaseModel):
