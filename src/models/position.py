@@ -9,7 +9,9 @@ class Position(BaseModel):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    department_id = Column(Integer, ForeignKey('departments.id'))
+    department_id = Column(
+        Integer, ForeignKey('departments.id', ondelete='SET NULL'),
+    )
 
     users = relationship('User', back_populates='position')
     department = relationship('Department', back_populates='positions')
