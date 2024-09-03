@@ -20,7 +20,7 @@ class Department(BaseModel):
     id = Column(Integer, id_seq, primary_key=True)
     name = Column(String, nullable=False)
     path: LtreeType = Column(LtreeType, nullable=False)
-    company_id = Column(Integer, ForeignKey('companies.id'))
+    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True)
     is_can_deleted = Column(Boolean, default=True)
 
     manager_id = Column(Integer, ForeignKey('user.id'), nullable=True)

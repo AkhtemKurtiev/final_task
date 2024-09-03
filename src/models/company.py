@@ -11,4 +11,7 @@ class Company(BaseModel):
     name = Column(String, unique=True, nullable=False)
 
     employees = relationship('User', back_populates='company')
-    departments = relationship('Department',  back_populates='company')
+    departments = relationship(
+        'Department',
+        back_populates='company',
+    )

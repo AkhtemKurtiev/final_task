@@ -21,7 +21,10 @@ class User(BaseModel):
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
 
-    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True)
+    company_id = Column(
+        Integer, ForeignKey('companies.id'),
+        nullable=True,
+    )
     position_id = Column(Integer, ForeignKey('positions.id'), nullable=True)
 
     company = relationship('Company', back_populates='employees')
