@@ -10,7 +10,8 @@ from src.shemas.user import (
     UserAdminCreateEmployee,
     UserLogin,
     UserName,
-    UserResgister
+    UserSignUp,
+    UserRegister
 )
 
 
@@ -41,16 +42,15 @@ async def check_account(
 
 @router.post('/sign-up/')
 async def sign_up(
-    account: str,
-    invite_token: str,
+    data: dict = Depends(UserSignUp),
     service: UserService = Depends(UserService)
 ):
-    return await service.sign_up(account, invite_token)
+    return await service.sign_up(data)
 
 
 @router.post('/sign-up-complete/')
 async def sign_up_complete(
-    user: dict = Depends(UserResgister),
+    user: dict = Depends(UserRegister),
     service: UserService = Depends(UserService)
 ):
     return await service.sign_up_complete(user)

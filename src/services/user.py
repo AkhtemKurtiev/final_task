@@ -66,11 +66,10 @@ class UserService(BaseService):
     @transaction_mode
     async def sign_up(
         self,
-        account: str,
-        invite_token: str
+        data
     ):
         try:
-            if not validate_invite_token(account, invite_token):
+            if not validate_invite_token(data.account, data.invite_token):
                 raise HTTPException(
                     status_code=400,
                     detail='Invalid invite token'

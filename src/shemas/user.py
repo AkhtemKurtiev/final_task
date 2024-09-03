@@ -37,11 +37,10 @@ class UserLogin(BaseModel):
     password: str
 
 
-class UserResgister(BaseModel):
+class UserRegister(BaseModel):
     email: EmailStr
     username: Annotated[str, MinLen(3), MaxLen(20)]
     password: str
-    username: str
     first_name: str
     last_name: str
     is_admin: Optional[bool] = True
@@ -60,3 +59,8 @@ class UserAdminCreateEmployee(BaseModel):
 class UserName(BaseModel):
     first_name: str
     last_name: str
+
+
+class UserSignUp(BaseModel):
+    account: str
+    invite_token: str
