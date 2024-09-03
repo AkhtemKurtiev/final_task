@@ -62,7 +62,7 @@ class Test_user_registration:
         )
         print("Response status code:", response.status_code)
         print("Response body:", response.text)
-        assert response.status_code == 200, 
+        assert response.status_code == 200
         assert response.json() == {
             "message": "Registration complete. Admin user created."
         }
