@@ -28,7 +28,7 @@ router = APIRouter(
 oauth2_sheme = OAuth2PasswordBearer(tokenUrl='/login')
 
 
-@router.post('/login')
+@router.post('/login', status_code=200)
 async def login(
     user: dict = Depends(UserLogin),
     service: UserService = Depends(UserService)
@@ -36,7 +36,7 @@ async def login(
     return await service.login(user)
 
 
-@router.get('/check_account/{email}')
+@router.get('/check_account/{email}', status_code=200)
 async def check_account(
     email: str,
     service: UserService = Depends(UserService)
@@ -44,7 +44,7 @@ async def check_account(
     return await service.check_account(email)
 
 
-@router.post('/sign-up/')
+@router.post('/sign-up/', status_code=201)
 async def sign_up(
     data: dict = Depends(UserSignUp),
     service: UserService = Depends(UserService)
@@ -52,7 +52,7 @@ async def sign_up(
     return await service.sign_up(data)
 
 
-@router.post('/sign-up-complete/')
+@router.post('/sign-up-complete/', status_code=200)
 async def sign_up_complete(
     user: dict = Depends(UserRegister),
     service: UserService = Depends(UserService)
@@ -60,7 +60,7 @@ async def sign_up_complete(
     return await service.sign_up_complete(user)
 
 
-@router.post('/create-employee/')
+@router.post('/create-employee/', status_code=201)
 async def create_employee(
     employee: dict = Depends(UserAdminCreateEmployee),
     current_user: User = Depends(admin_required),
@@ -69,7 +69,7 @@ async def create_employee(
     return await service.create_employee(employee, current_user)
 
 
-@router.post('/confirm-registration-employee/')
+@router.post('/confirm-registration-employee/', status_code=200)
 async def confirm_registration(
     token: str,
     password: str,
@@ -78,7 +78,7 @@ async def confirm_registration(
     return await service.confirm_registration(token, password)
 
 
-@router.put('/email_update/')
+@router.put('/email_update/', status_code=200)
 async def email_update(
     token: str,
     new_email: str,
@@ -88,7 +88,7 @@ async def email_update(
     return await service.email_update(token, new_email, current_user)
 
 
-@router.put('/name_update/')
+@router.put('/name_update/', status_code=200)
 async def name_update(
     name: dict = Depends(UserName),
     current_user: User = Depends(authorized_user_required),

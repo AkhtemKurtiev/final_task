@@ -18,7 +18,7 @@ router = APIRouter(
 )
 
 
-@router.post('/departments/')
+@router.post('/departments/', status_code=201)
 async def create_department(
     name: str,
     parent_id: Optional[int] = None,
@@ -28,7 +28,7 @@ async def create_department(
     return await service.create_department(name, parent_id, current_user)
 
 
-@router.post('/positions/')
+@router.post('/positions/', status_code=201)
 async def create_position(
     name: str,
     department_id: int,
@@ -38,7 +38,7 @@ async def create_position(
     return await service.create_position(name, department_id, current_user)
 
 
-@router.post('/assign-position/')
+@router.post('/assign-position/', status_code=200)
 async def assign_position_to_user(
     user_id: int,
     position_id: int,
@@ -50,7 +50,7 @@ async def assign_position_to_user(
     )
 
 
-@router.post('/departments/{department_id}/assign-manager/')
+@router.post('/departments/{department_id}/assign-manager/', status_code=200)
 async def assign_manager(
     department_id: int,
     user_id: int,
@@ -60,7 +60,7 @@ async def assign_manager(
     return await service.assign_manager(department_id, user_id, current_user)
 
 
-@router.delete('/departments/delete/')
+@router.delete('/departments/delete/', status_code=204)
 async def delete_department(
     department_id: int,
     current_user: User = Depends(admin_required),
