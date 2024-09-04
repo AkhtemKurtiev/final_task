@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 
-@router.post('/task_create/', response_model=MessageResponse)
+@router.post('/task_create/')
 async def task_create(
     task_data: dict = Depends(TaskCreate),
     current_user: User = Depends(authorized_user_required),
@@ -22,7 +22,7 @@ async def task_create(
     return await service.task_create(task_data, current_user)
 
 
-@router.put('/task_update/{task_id}/', response_model=MessageResponse)
+@router.put('/task_update/{task_id}/')
 async def task_update(
     task_id: int,
     task_update: dict = Depends(TaskUpdate),
@@ -32,7 +32,7 @@ async def task_update(
     return await service.task_update(task_id, task_update, current_user)
 
 
-@router.delete('/task_delete/{task_id}/', response_model=MessageResponse)
+@router.delete('/task_delete/{task_id}/')
 async def task_delete(
     task_id: int,
     current_user: User = Depends(authorized_user_required),
