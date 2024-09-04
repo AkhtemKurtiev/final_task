@@ -1,8 +1,16 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.utils.auth_protect import admin_required
 from src.database.db import get_async_session
+from src.exceptions.exceptions import (
+    CustomHTTPException,
+    DepartmentNotFoundException,
+    ParentDepartmentNotFoundException,
+    PositionNotFoundException,
+    RootDepartmentNotFoundException,
+    UserNotFoundException,
+)
 from src.models.department import Department
 from src.models.user import User
 from src.utils.service import BaseService
@@ -26,30 +34,25 @@ class StructureService(BaseService):
             if parent_id:
                 parent = await self.uow.department.get_department(parent_id)
                 if not parent or parent.company_id != company_id:
-                    raise HTTPException(
-                        status_code=404, detail='Parent department not found'
-                    )
+                    raise ParentDepartmentNotFoundException()
             else:
                 parent = await self.uow.department.get_department_filter(
                     company_id, is_can_deleted=False
                 )
                 if not parent:
-                    raise HTTPException(
-                        status_code=400, detail='Root department not found'
-                    )
+                    raise RootDepartmentNotFoundException()
 
             new_department = await self.uow.department.add_department(
                 department_name=name, company_id=company_id, parent=parent
             )
 
             return new_department
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail={
-                'status': 'error',
-                'data': None,
-                'detail': None
-                })
+        except ParentDepartmentNotFoundException as e:
+            raise e
+        except RootDepartmentNotFoundException as e:
+            raise e
+        except Exception:
+            raise CustomHTTPException()
 
     @transaction_mode
     async def create_position(
@@ -63,22 +66,17 @@ class StructureService(BaseService):
                 await self.uow.department.get_department(department_id)
             )
             if not department:
-                raise HTTPException(
-                    status_code=404,  detail='Department not found'
-                )
+                raise DepartmentNotFoundException()
 
             new_position = (
                 await self.uow.position.add_position(name, department)
             )
 
             return new_position
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail={
-                'status': 'error',
-                'data': None,
-                'detail': None
-                })
+        except DepartmentNotFoundException as e:
+            raise e
+        except Exception:
+            raise CustomHTTPException()
 
     @transaction_mode
     async def assign_position_to_user(
@@ -91,25 +89,22 @@ class StructureService(BaseService):
         try:
             user = await self.uow.user.get_user_by_filter_id(user_id)
             if not user:
-                raise HTTPException(status_code=404, detail='User not found')
+                raise UserNotFoundException()
 
             position = await self.uow.position.get_position(position_id)
             if not position:
-                raise HTTPException(
-                    status_code=404, detail='Position not found'
-                )
+                raise PositionNotFoundException()
 
             user.position = position
             await self.uow.user.update_user(user)
 
             return {'message': 'Position assigned to user successfully'}
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail={
-                'status': 'error',
-                'data': None,
-                'detail': None
-                })
+        except UserNotFoundException as e:
+            raise e
+        except PositionNotFoundException as e:
+            raise e
+        except Exception:
+            raise CustomHTTPException()
 
     @transaction_mode
     async def assign_manager(
@@ -123,13 +118,11 @@ class StructureService(BaseService):
                 await self.uow.department.get_department(department_id)
             )
             if not department:
-                raise HTTPException(
-                    status_code=404, detail='Department not found'
-                )
+                raise DepartmentNotFoundException()
 
             user = await self.uow.user.get_user_by_filter_id(user_id)
             if not user:
-                raise HTTPException(status_code=404, detail='User not found')
+                raise UserNotFoundException()
 
             department.manager_id = user.id
             await self.uow.department.update_department(department)
@@ -139,13 +132,12 @@ class StructureService(BaseService):
                 'department': department.name,
                 'manager': user.first_name + ' ' + user.last_name
             }
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail={
-                'status': 'error',
-                'data': None,
-                'detail': None
-                })
+        except DepartmentNotFoundException as e:
+            raise e
+        except UserNotFoundException as e:
+            raise e
+        except Exception:
+            raise CustomHTTPException()
 
     @transaction_mode
     async def delete_department(
@@ -158,17 +150,12 @@ class StructureService(BaseService):
                 await self.uow.department.get_department(department_id)
             )
             if not department:
-                raise HTTPException(
-                    status_code=404, detail='Department not found'
-                )
+                raise DepartmentNotFoundException()
 
             await self.uow.department.delete_department(department)
 
             return {'message': 'Department deleted successfully'}
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail={
-                'status': 'error',
-                'data': None,
-                'detail': None
-                })
+        except DepartmentNotFoundException as e:
+            raise e
+        except Exception:
+            raise CustomHTTPException()

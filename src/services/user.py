@@ -1,9 +1,16 @@
-from fastapi import HTTPException
-
 from src.api.user.v1.utils.email_message import (
     create_invite_token, send_invite_email, validate_invite_token
 )
 from src.auth.utils import encode_jwt, hash_password, validate_password
+from src.exceptions.exceptions import (
+    AccountAlreadyExistsException,
+    BadTokenException,
+    CustomHTTPException,
+    EmailAlreadyRegisteredException,
+    InvalidDataException,
+    InvalidInviteTokenException,
+    UserNotFoundException
+)
 from src.models.user import User
 from src.utils.service import BaseService
 from src.utils.unit_of_work import transaction_mode
@@ -20,20 +27,16 @@ class UserService(BaseService):
         try:
             db_user = await self.uow.user.get_user_by_filter_email(user.email)
             if not db_user:
-                raise HTTPException(status_code=400, detail='Invalid data1')
+                raise InvalidDataException()
 
             if not validate_password(user.password, db_user.hashed_password):
-                raise HTTPException(status_code=400, detail='Invalid data2')
-
+                raise InvalidDataException()
             access_token = encode_jwt({'sub': db_user.email})
             return {'access_token': access_token, 'token_type': 'bearer'}
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail={
-                'status': 'error',
-                'data': None,
-                'detail': None
-                })
+        except InvalidDataException as e:
+            raise e
+        except Exception:
+            raise CustomHTTPException()
 
     @transaction_mode
     async def check_account(
@@ -44,10 +47,7 @@ class UserService(BaseService):
             db_user = await self.uow.user.get_user_by_filter_email(email)
 
             if db_user:
-                raise HTTPException(
-                    status_code=400,
-                    detail='Email already registered'
-                )
+                raise EmailAlreadyRegisteredException()
 
             invite_token = create_invite_token(email)
             # await send_invite_email(email, invite_token)
@@ -55,13 +55,10 @@ class UserService(BaseService):
                 'masssege': 'Invite sent to email',
                 'invite_token': invite_token
             }
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail={
-                'status': 'error',
-                'data': None,
-                'detail': None
-                })
+        except EmailAlreadyRegisteredException as e:
+            raise e
+        except Exception:
+            raise CustomHTTPException()
 
     @transaction_mode
     async def sign_up(
@@ -70,18 +67,12 @@ class UserService(BaseService):
     ):
         try:
             if not validate_invite_token(data.account, data.invite_token):
-                raise HTTPException(
-                    status_code=400,
-                    detail='Invalid invite token'
-                )
+                raise InvalidInviteTokenException()
             return {"message": "Invite token validated"}
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail={
-                'status': 'error',
-                'data': None,
-                'detail': None
-                })
+        except InvalidInviteTokenException as e:
+            raise e
+        except Exception:
+            raise CustomHTTPException()
 
     @transaction_mode
     async def sign_up_complete(
@@ -92,10 +83,7 @@ class UserService(BaseService):
             db_user = await self.uow.user.get_user_by_filter_email(user.email)
 
             if db_user:
-                raise HTTPException(
-                    status_code=400,
-                    detail='Account already exists'
-                )
+                raise AccountAlreadyExistsException()
 
             new_company = await self.uow.company.add_company(user.company_name)
 
@@ -113,13 +101,10 @@ class UserService(BaseService):
             )
 
             return {"message": "Registration complete. Admin user created."}
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail={
-                'status': 'error',
-                'data': None,
-                'detail': None
-                })
+        except AccountAlreadyExistsException as e:
+            raise e
+        except Exception:
+            raise CustomHTTPException()
 
     @transaction_mode
     async def create_employee(
@@ -133,10 +118,7 @@ class UserService(BaseService):
             )
 
             if db_user:
-                raise HTTPException(
-                    status_code=400,
-                    detail="User with this email already exists"
-                )
+                raise EmailAlreadyRegisteredException()
 
             new_employee = await self.uow.user.add_user_first_step(
                 employee,
@@ -152,13 +134,10 @@ class UserService(BaseService):
 
             # await send_invite_email(employee.email, invite_token)
             return {'messege': 'Employee created and invite sent to email'}
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail={
-                'status': 'error',
-                'data': None,
-                'detail': None
-                })
+        except EmailAlreadyRegisteredException as e:
+            raise e
+        except Exception:
+            raise CustomHTTPException()
 
     @transaction_mode
     async def confirm_registration(
@@ -172,14 +151,14 @@ class UserService(BaseService):
             )
 
             if not invite_token:
-                raise HTTPException(status_code=400, detail='Bad token')
+                raise BadTokenException()
 
             user = await self.uow.user.get_user_by_filter_id(
                 invite_token.user_id
             )
 
             if not user:
-                raise HTTPException(status_code=400, detail='User not found')
+                raise UserNotFoundException()
 
             hashed_password = hash_password(password)
             user.hashed_password = hashed_password
@@ -190,13 +169,12 @@ class UserService(BaseService):
             await self.uow.invite_token.delete_invite_token(invite_token)
 
             return {'massage': 'Registration completed successfully'}
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail={
-                'status': 'error',
-                'data': None,
-                'detail': None
-                })
+        except BadTokenException as e:
+            raise e
+        except UserNotFoundException as e:
+            raise e
+        except Exception:
+            raise CustomHTTPException()
 
     @transaction_mode
     async def email_update(
@@ -210,28 +188,23 @@ class UserService(BaseService):
                 await self.uow.user.get_user_by_filter_id(current_user.id)
             )
             if not validate_invite_token(new_email, token):
-                raise HTTPException(
-                    status_code=400, detail='Invalid invite token'
-                )
+                raise InvalidInviteTokenException()
 
             db_user = await self.uow.user.get_user_by_filter_email(new_email)
 
             if db_user:
-                raise HTTPException(
-                    status_code=400, detail='Email is already use'
-                )
+                raise EmailAlreadyRegisteredException()
 
             current_user.email = new_email
             await self.uow.user.update_user(current_user)
 
             return {'message': 'Email updated successfully'}
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail={
-                'status': 'error',
-                'data': None,
-                'detail': None
-                })
+        except InvalidInviteTokenException as e:
+            raise e
+        except EmailAlreadyRegisteredException as e:
+            raise e
+        except Exception:
+            raise CustomHTTPException()
 
     @transaction_mode
     async def name_update(
@@ -249,10 +222,5 @@ class UserService(BaseService):
             await self.uow.user.update_user(current_user)
 
             return {'message': 'Name update successfully'}
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail={
-                'status': 'error',
-                'data': None,
-                'detail': None
-                })
+        except Exception:
+            raise CustomHTTPException()
