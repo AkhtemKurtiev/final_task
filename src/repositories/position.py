@@ -10,6 +10,7 @@ class PositionRepository(SqlAlchemyRepository):
         self.session.add(new_position)
         await self.session.commit()
         await self.session.refresh(new_position)
+        return new_position
 
     async def get_position(self, position_id):
         return await self.session.get(self.model, position_id)
