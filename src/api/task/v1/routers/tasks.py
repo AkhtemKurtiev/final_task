@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from src.api.utils.auth_protect import authorized_user_required
 from src.models.user import User
@@ -13,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.post('/task_create/', status_code=201)
+@router.post('/task_create/', status_code=HTTP_201_CREATED)
 async def task_create(
     task_data: dict = Depends(TaskCreate),
     current_user: User = Depends(authorized_user_required),
@@ -22,7 +23,7 @@ async def task_create(
     return await service.task_create(task_data, current_user)
 
 
-@router.put('/task_update/{task_id}/', status_code=200)
+@router.put('/task_update/{task_id}/', status_code=HTTP_200_OK)
 async def task_update(
     task_id: int,
     task_update: dict = Depends(TaskUpdate),
@@ -32,7 +33,7 @@ async def task_update(
     return await service.task_update(task_id, task_update, current_user)
 
 
-@router.delete('/task_delete/{task_id}/', status_code=204)
+@router.delete('/task_delete/{task_id}/', status_code=HTTP_204_NO_CONTENT)
 async def task_delete(
     task_id: int,
     current_user: User = Depends(authorized_user_required),
