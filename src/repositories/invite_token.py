@@ -15,7 +15,6 @@ class InviteTokenRepository(SqlAlchemyRepository):
             )
 
         self.session.add(new)
-        await self.session.commit()
         return new
 
     async def get_invite_token_filter(self, token):
@@ -26,4 +25,3 @@ class InviteTokenRepository(SqlAlchemyRepository):
 
     async def delete_invite_token(self, invite_token):
         await self.session.delete(invite_token)
-        await self.session.commit()

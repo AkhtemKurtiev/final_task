@@ -8,8 +8,6 @@ class PositionRepository(SqlAlchemyRepository):
     async def add_position(self, name, department):
         new_position = self.model(name=name, department=department)
         self.session.add(new_position)
-        await self.session.commit()
-        await self.session.refresh(new_position)
         return new_position
 
     async def get_position(self, position_id):

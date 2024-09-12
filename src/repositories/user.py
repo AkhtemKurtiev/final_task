@@ -31,8 +31,6 @@ class UserRepository(SqlAlchemyRepository):
             )
 
         self.session.add(new)
-        await self.session.commit()
-        await self.session.refresh(new)
         return new
 
     async def add_user_first_step(self, new_user, company_id):
@@ -47,11 +45,8 @@ class UserRepository(SqlAlchemyRepository):
             )
 
         self.session.add(new)
-        await self.session.commit()
-        await self.session.refresh(new)
         return new
 
     async def update_user(self, user):
         self.session.add(user)
-        await self.session.commit()
-        await self.session.refresh(user)
+        return user

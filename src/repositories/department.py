@@ -41,8 +41,6 @@ class DepartmentRepository(SqlAlchemyRepository):
 
     async def update_department(self, department):
         self.session.add(department)
-        await self.session.commit()
-        await self.session.refresh(department)
 
     async def delete_department(self, department):
         await department.delete_department(self.session)

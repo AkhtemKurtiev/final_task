@@ -20,8 +20,6 @@ class TaskRepository(SqlAlchemyRepository):
             performers=task.performers
         )
         self.session.add(new)
-        await self.session.commit()
-        await self.session.refresh(new)
         return new
 
     async def get_task_by_filter_id(self, task_id):
@@ -39,9 +37,6 @@ class TaskRepository(SqlAlchemyRepository):
 
     async def update_task(self, task):
         self.session.add(task)
-        await self.session.commit()
-        await self.session.refresh(task)
 
     async def delete_task(self, task):
         await self.session.delete(task)
-        await self.session.commit()
